@@ -6,7 +6,7 @@ import { TOKEN_COOKIE } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "ダッシュボード" };
 
-const API_URL = process.env.API_URL ?? "http://127.0.0.1:8010";
+const API_URL = process.env.API_URL ?? "http://127.0.0.1:57069";
 
 type User = { email: string; name: string };
 

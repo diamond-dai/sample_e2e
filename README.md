@@ -22,7 +22,8 @@ e2e/        Playwright。バックエンド・フロントエンドを自動起�
 
 ## ポート
 
-3000/8000 は他プロジェクトと衝突しやすいため、**フロント 3010 / バックエンド 8010** をデフォルトにしている。
+3000/8000 等の定番ポートは他プロジェクトと衝突しやすいため、5万番台のランダムな番号
+**フロント 55863 / バックエンド 57069** をデフォルトにしている。
 E2E実行時は環境変数 `FRONTEND_PORT` / `BACKEND_PORT` で変更可能。
 
 ## セットアップ
@@ -42,8 +43,8 @@ cd e2e && pnpm install && pnpm exec playwright install chromium
 
 ```bash
 # 開発サーバー(手動で触る場合)
-cd backend && uv run fastapi dev app/main.py --port 8010
-cd frontend && pnpm dev          # → http://localhost:3010
+cd backend && uv run fastapi dev app/main.py --port 57069
+cd frontend && pnpm dev          # → http://localhost:55863
 
 # バックエンドの単体テスト
 cd backend && uv run pytest

@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// 3000/8000は他プロジェクトと衝突しやすいのでデフォルトをずらしている
-const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 3010);
-const BACKEND_PORT = Number(process.env.BACKEND_PORT ?? 8010);
+// 3000/8000等の定番ポートは他プロジェクトと衝突しやすいので、5万番台のランダムな番号をデフォルトにしている
+const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 55863);
+const BACKEND_PORT = Number(process.env.BACKEND_PORT ?? 57069);
 const BASE_URL = `http://localhost:${FRONTEND_PORT}`;
 
 export default defineConfig({
