@@ -43,6 +43,7 @@ export default defineConfig({
       url: `http://127.0.0.1:${BACKEND_PORT}/healthz`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
+      stdout: "pipe", // 起動待ちの間なにも表示されないと不安なのでサーバーログを流す
     },
     {
       command: `pnpm exec next dev --port ${FRONTEND_PORT}`,
@@ -50,6 +51,7 @@ export default defineConfig({
       url: BASE_URL,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      stdout: "pipe",
       env: { API_URL: `http://127.0.0.1:${BACKEND_PORT}` },
     },
   ],
