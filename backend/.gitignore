@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# SQLite (ローカル開発・テスト用)
+app.db
+test.db

@@ -1,12 +1,23 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
+from app.db import init_db
 from app.deps import CurrentUser
-from app.routers import auth
+from app.routers import auth, todos
 from app.schemas import UserOut
 
-app = FastAPI(title="Sample E2E API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+
+app = FastAPI(title="Sample E2E API", lifespan=lifespan)
 
 app.include_router(auth.router)
+app.include_router(todos.router)
 
 
 @app.get("/healthz", tags=["meta"])

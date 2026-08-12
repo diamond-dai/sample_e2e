@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
+from sqlalchemy import select
 
-from app import users
-from app.deps import SettingsDep
+from app.deps import SessionDep, SettingsDep
+from app.models import User
 from app.schemas import LoginRequest, TokenResponse
 from app.security import create_access_token, verify_password
 
@@ -9,8 +10,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login")
-async def login(body: LoginRequest, settings: SettingsDep) -> TokenResponse:
-    user = users.find_by_email(body.email)
+async def login(
+    body: LoginRequest, session: SessionDep, settings: SettingsDep
+) -> TokenResponse:
+    user = await session.scalar(select(User).where(User.email == body.email))
     # アカウント列挙対策: ユーザー不在とパスワード不一致で同じレスポンスを返す
     if user is None or not verify_password(body.password, user.password_hash):
         raise HTTPException(

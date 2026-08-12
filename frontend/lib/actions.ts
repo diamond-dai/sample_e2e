@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -50,4 +51,58 @@ export async function logout(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(TOKEN_COOKIE);
   redirect("/login");
+}
+
+async function apiFetch(path: string, init: RequestInit): Promise<Response> {
+  const token = (await cookies()).get(TOKEN_COOKIE)?.value;
+  if (!token) {
+    redirect("/login");
+  }
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...init.headers,
+    },
+    cache: "no-store",
+  });
+  if (res.status === 401) {
+    redirect("/login");
+  }
+  return res;
+}
+
+export async function createTodo(formData: FormData): Promise<void> {
+  const title = formData.get("title");
+  if (typeof title !== "string" || !title.trim()) {
+    return;
+  }
+  await apiFetch("/todos", {
+    method: "POST",
+    body: JSON.stringify({ title: title.trim() }),
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function toggleTodo(formData: FormData): Promise<void> {
+  const id = Number(formData.get("id"));
+  const done = formData.get("done") === "true";
+  if (!Number.isInteger(id)) {
+    return;
+  }
+  await apiFetch(`/todos/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ done }),
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function deleteTodo(formData: FormData): Promise<void> {
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) {
+    return;
+  }
+  await apiFetch(`/todos/${id}`, { method: "DELETE" });
+  revalidatePath("/dashboard");
 }

@@ -27,7 +27,7 @@ export default defineConfig({
     // 保存した認証状態を使い回すテスト
     {
       name: "authenticated",
-      testMatch: /dashboard\.spec\.ts/,
+      testMatch: /(dashboard|todo)\.spec\.ts/,
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],

@@ -17,7 +17,7 @@ test.describe("ログイン", () => {
     await page.getByRole("button", { name: "ログイン" }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByTestId("user-email")).toHaveText(DEMO_USER.email);
+    await expect(page.getByTestId("user-name")).toHaveText(DEMO_USER.name);
   });
 
   test("間違ったパスワードではエラーメッセージが表示される", async ({ page }) => {

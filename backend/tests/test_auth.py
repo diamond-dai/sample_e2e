@@ -1,13 +1,4 @@
-import pytest
-from httpx import ASGITransport, AsyncClient
-
-from app.main import app
-
-
-@pytest.fixture
-async def client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
-        yield c
+from httpx import AsyncClient
 
 
 async def login(client: AsyncClient, email: str, password: str):
@@ -36,9 +27,8 @@ async def test_login_unknown_user_returns_same_error(client: AsyncClient):
     assert unknown.json() == wrong_pw.json()
 
 
-async def test_me_with_valid_token(client: AsyncClient):
-    token = (await login(client, "demo@example.com", "password123")).json()["access_token"]
-    res = await client.get("/me", headers={"Authorization": f"Bearer {token}"})
+async def test_me_with_valid_token(client: AsyncClient, auth_headers: dict[str, str]):
+    res = await client.get("/me", headers=auth_headers)
     assert res.status_code == 200
     assert res.json() == {"email": "demo@example.com", "name": "Demo User"}
 
