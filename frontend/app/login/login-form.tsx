@@ -9,7 +9,10 @@ export function LoginForm() {
   return (
     <form action={formAction} className="flex w-full max-w-sm flex-col gap-4">
       {state?.error && (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
           {state.error}
         </p>
       )}

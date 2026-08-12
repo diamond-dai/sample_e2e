@@ -26,7 +26,8 @@ async def _db():
 async def client():
     from app.main import app
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
         yield c
 
 

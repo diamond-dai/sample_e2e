@@ -12,7 +12,9 @@ test.describe("TODO(認証済み)", () => {
     const item = page.getByRole("listitem").filter({ hasText: title });
     await expect(item).toBeVisible();
 
-    await item.getByRole("button", { name: `「${title}」を完了にする` }).click();
+    await item
+      .getByRole("button", { name: `「${title}」を完了にする` })
+      .click();
     await expect(
       item.getByRole("button", { name: `「${title}」を未完了に戻す` }),
     ).toBeVisible();

@@ -37,7 +37,8 @@ async def test_todo_crud_flow(client: AsyncClient, auth_headers: Headers):
 async def test_todo_not_found(client: AsyncClient, auth_headers: Headers):
     res = await client.patch("/todos/999999", json={"done": True}, headers=auth_headers)
     assert res.status_code == 404
-    assert (await client.delete("/todos/999999", headers=auth_headers)).status_code == 404
+    deleted = await client.delete("/todos/999999", headers=auth_headers)
+    assert deleted.status_code == 404
 
 
 async def test_todo_title_validation(client: AsyncClient, auth_headers: Headers):

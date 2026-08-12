@@ -32,7 +32,9 @@ async def init_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
     async with session_factory() as session:
-        demo = await session.scalar(select(User).where(User.email == "demo@example.com"))
+        demo = await session.scalar(
+            select(User).where(User.email == "demo@example.com")
+        )
         if demo is None:
             session.add(
                 User(

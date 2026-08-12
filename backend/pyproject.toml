@@ -29,9 +29,29 @@ module-root = ""
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+]
+
+[tool.ruff.lint.per-file-ignores]
+# conftest.py はDB設定のため import より前に環境変数を設定する必要がある
+"tests/conftest.py" = ["E402"]
+
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.2",
 ]

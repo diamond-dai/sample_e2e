@@ -10,7 +10,9 @@ test.describe("ログイン", () => {
     await expect(page.getByRole("heading", { name: "ログイン" })).toBeVisible();
   });
 
-  test("正しい資格情報でログインするとダッシュボードが表示される", async ({ page }) => {
+  test("正しい資格情報でログインするとダッシュボードが表示される", async ({
+    page,
+  }) => {
     await page.goto("/login");
     await page.getByLabel("メールアドレス").fill(DEMO_USER.email);
     await page.getByLabel("パスワード").fill(DEMO_USER.password);
@@ -20,7 +22,9 @@ test.describe("ログイン", () => {
     await expect(page.getByTestId("user-name")).toHaveText(DEMO_USER.name);
   });
 
-  test("間違ったパスワードではエラーメッセージが表示される", async ({ page }) => {
+  test("間違ったパスワードではエラーメッセージが表示される", async ({
+    page,
+  }) => {
     await page.goto("/login");
     await page.getByLabel("メールアドレス").fill(DEMO_USER.email);
     await page.getByLabel("パスワード").fill("wrong-password");

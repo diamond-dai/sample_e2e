@@ -42,7 +42,10 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-3 text-sm text-gray-500">
           <span data-testid="user-name">{user.name}</span>
           <form action={logout}>
-            <button type="submit" className="rounded-md border border-gray-300 px-2 py-1">
+            <button
+              type="submit"
+              className="rounded-md border border-gray-300 px-2 py-1"
+            >
               ログアウト
             </button>
           </form>

@@ -1,0 +1,5 @@
+# ルートはlint/git hooksツール置き場。frontend/e2eはそれぞれ独立したpnpmプロジェクト
+# (このファイルはpnpmのワークスペース探索の境界にもなる)
+packages: []
+allowBuilds:
+  lefthook: true

@@ -29,9 +29,7 @@ async def get_current_user(
         )
     email = decode_access_token(credentials.credentials, settings)
     user = (
-        await session.scalar(select(User).where(User.email == email))
-        if email
-        else None
+        await session.scalar(select(User).where(User.email == email)) if email else None
     )
     if user is None:
         raise HTTPException(

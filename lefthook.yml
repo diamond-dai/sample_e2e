@@ -1,0 +1,13 @@
+# pre-commitフック: ステージされたファイルだけをlint/整形し、修正を自動で再ステージする
+pre-commit:
+  parallel: true
+  commands:
+    ruff:
+      root: "backend/"
+      glob: "*.py"
+      run: uv run ruff check --fix {staged_files} && uv run ruff format {staged_files}
+      stage_fixed: true
+    biome:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true

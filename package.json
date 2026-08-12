@@ -1,0 +1,14 @@
+{
+  "name": "sample-e2e-root",
+  "private": true,
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "prepare": "lefthook install"
+  },
+  "packageManager": "pnpm@11.21.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "lefthook": "^2.1.10"
+  }
+}

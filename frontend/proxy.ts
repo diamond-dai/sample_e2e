@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { TOKEN_COOKIE } from "@/lib/constants";
 
 // Cookieの有無だけの軽量チェック。トークンの検証は各ページ経由でバックエンドが行う
