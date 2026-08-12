@@ -1,5 +1,6 @@
 # E2Eテスト一式をDocker内で完結させる構成。ホストへのポート公開なし。
-# 実行: docker compose run --build --rm e2e
+# (compose.yaml の名前は将来の開発環境用に空けてあるため、-f で明示的に指定する)
+# 実行: docker compose -f compose.e2e.yaml run --build --rm e2e
 # DBはvolumeを持たないので、毎回まっさらな状態から始まる(冪等)
 services:
   db:

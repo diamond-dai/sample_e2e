@@ -59,10 +59,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: E2E (docker compose)
-        run: docker compose run --build --rm e2e
+        run: docker compose -f compose.e2e.yaml run --build --rm e2e
       - name: cleanup
         if: always()
-        run: docker compose down
+        run: docker compose -f compose.e2e.yaml down
       - name: upload report
         if: failure()
         uses: actions/upload-artifact@v6

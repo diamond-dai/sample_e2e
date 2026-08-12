@@ -8,7 +8,7 @@ JWTログインと簡単なTODOアプリを題材にしたサンプル。ログ�
 backend/      FastAPI (uv管理)。JWT発行(/auth/login)、ユーザーAPI(/me)、TODO CRUD(/todos)
 frontend/     Next.js 16 App Router (pnpm)。BFF構成でJWTをHttpOnly Cookieに保存
 e2e/          Playwright。ローカルではサーバー自動起動、composeでは外部サーバー接続
-compose.yaml  db(Postgres) + backend + frontend + e2e の4サービス。ポート公開なし
+compose.e2e.yaml  db(Postgres) + backend + frontend + e2e の4サービス。ポート公開なし
 ```
 
 ### 認証の流れ
@@ -100,9 +100,9 @@ cd e2e && pnpm test login.spec.ts  # ファイル指定
 ### 4. E2Eテスト(Docker Compose、完全隔離・冪等)
 
 ```bash
-docker compose down                        # 前回のコンテナが残っていれば消す(DBを確実にまっさらに)
-docker compose run --build --rm e2e        # ビルド → db/backend/frontend起動 → E2E実行
-docker compose down                        # 後片付け
+docker compose -f compose.e2e.yaml down                        # 前回のコンテナが残っていれば消す(DBを確実にまっさらに)
+docker compose -f compose.e2e.yaml run --build --rm e2e        # ビルド → db/backend/frontend起動 → E2E実行
+docker compose -f compose.e2e.yaml down                        # 後片付け
 ```
 
 - 4サービスすべて内部ネットワークで通信し、**ホストへのポート公開はゼロ**(ローカルのポート使用状況と無関係に動く)
@@ -129,7 +129,7 @@ cd e2e && pnpm exec playwright show-trace test-results/<失敗したテスト名
 
 - **ポートが使用中**: `FRONTEND_PORT` / `BACKEND_PORT` 環境変数で変更できる(例: `BACKEND_PORT=57100 pnpm test`)。Docker Compose ならポートを一切使わないのでそもそも衝突しない
 - **`pn test` の序盤が無出力**: サーバー起動待ち。`[WebServer]` プレフィックスのログが流れていれば正常
-- **DBを初期化したい**: ローカルは `rm backend/app.db`、Docker は `docker compose down`
+- **DBを初期化したい**: ローカルは `rm backend/app.db`、Docker は `docker compose -f compose.e2e.yaml down`
 
 ## Lint・フォーマット・Git hooks
 
@@ -154,7 +154,7 @@ pnpm lint:fix      # 自動修正
 |---|---|
 | lint | ruff(backend)+ biome(frontend / e2e) |
 | backend-test | pytest 10件 |
-| e2e | `docker compose run e2e` で隔離E2E 7件。失敗時はレポートをartifactsに保存 |
+| e2e | `docker compose -f compose.e2e.yaml run e2e` で隔離E2E 7件。失敗時はレポートをartifactsに保存 |
 
 ## E2Eテストの構成
 
