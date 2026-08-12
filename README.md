@@ -131,6 +131,31 @@ cd e2e && pnpm exec playwright show-trace test-results/<失敗したテスト名
 - **`pn test` の序盤が無出力**: サーバー起動待ち。`[WebServer]` プレフィックスのログが流れていれば正常
 - **DBを初期化したい**: ローカルは `rm backend/app.db`、Docker は `docker compose down`
 
+## Lint・フォーマット・Git hooks
+
+```bash
+# Python (backend)
+cd backend && uv run ruff check . && uv run ruff format .
+
+# TypeScript/JSON (frontend, e2e) — ルートから一括
+pnpm lint          # チェックのみ
+pnpm lint:fix      # 自動修正
+```
+
+- 初回 `pnpm install`(ルート)で **lefthook** が pre-commit フックを設置する。
+  以後コミット時にステージされたファイルへ ruff / biome が自動で走り、修正は自動で再ステージされる
+- フックを一時的に飛ばす場合: `git commit --no-verify`
+
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` で push / PR ごとに3ジョブが並列実行される:
+
+| ジョブ | 内容 |
+|---|---|
+| lint | ruff(backend)+ biome(frontend / e2e) |
+| backend-test | pytest 10件 |
+| e2e | `docker compose run e2e` で隔離E2E 7件。失敗時はレポートをartifactsに保存 |
+
 ## E2Eテストの構成
 
 - `tests/auth.setup.ts` — 一度だけUIログインし、認証状態(Cookie)を `playwright/.auth/user.json` に保存
