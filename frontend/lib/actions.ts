@@ -39,7 +39,10 @@ export async function login(
   const cookieStore = await cookies();
   cookieStore.set(TOKEN_COOKIE, access_token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // 本番(https)ではSecure必須。httpで動かすコンテナ内E2EだけCOOKIE_SECURE=falseで外す
+    secure:
+      process.env.COOKIE_SECURE !== "false" &&
+      process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: expires_in,

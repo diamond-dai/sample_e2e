@@ -3,7 +3,10 @@ import { defineConfig, devices } from "@playwright/test";
 // 3000/8000等の定番ポートは他プロジェクトと衝突しやすいので、5万番台のランダムな番号をデフォルトにしている
 const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 55863);
 const BACKEND_PORT = Number(process.env.BACKEND_PORT ?? 57069);
-const BASE_URL = `http://localhost:${FRONTEND_PORT}`;
+
+// E2E_BASE_URL指定時(docker compose)は起動済みの外部サーバーに接続し、webServerを起動しない
+const EXTERNAL_BASE_URL = process.env.E2E_BASE_URL;
+const BASE_URL = EXTERNAL_BASE_URL ?? `http://localhost:${FRONTEND_PORT}`;
 
 export default defineConfig({
   testDir: "./tests",
@@ -35,24 +38,28 @@ export default defineConfig({
       },
     },
   ],
-  webServer: [
-    {
-      command: `uv run fastapi dev app/main.py --port ${BACKEND_PORT}`,
-      cwd: "../backend",
-      // uvicornは127.0.0.1にbindする。localhostだと::1に解決されて届かないことがある
-      url: `http://127.0.0.1:${BACKEND_PORT}/healthz`,
-      reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
-      stdout: "pipe", // 起動待ちの間なにも表示されないと不安なのでサーバーログを流す
-    },
-    {
-      command: `pnpm exec next dev --port ${FRONTEND_PORT}`,
-      cwd: "../frontend",
-      url: BASE_URL,
-      reuseExistingServer: !process.env.CI,
-      timeout: 120_000,
-      stdout: "pipe",
-      env: { API_URL: `http://127.0.0.1:${BACKEND_PORT}` },
-    },
-  ],
+  ...(EXTERNAL_BASE_URL
+    ? {}
+    : {
+        webServer: [
+          {
+            command: `uv run fastapi dev app/main.py --port ${BACKEND_PORT}`,
+            cwd: "../backend",
+            // uvicornは127.0.0.1にbindする。localhostだと::1に解決されて届かないことがある
+            url: `http://127.0.0.1:${BACKEND_PORT}/healthz`,
+            reuseExistingServer: !process.env.CI,
+            timeout: 60_000,
+            stdout: "pipe" as const, // 起動待ちの間なにも表示されないと不安なのでサーバーログを流す
+          },
+          {
+            command: `pnpm exec next dev --port ${FRONTEND_PORT}`,
+            cwd: "../frontend",
+            url: BASE_URL,
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+            stdout: "pipe" as const,
+            env: { API_URL: `http://127.0.0.1:${BACKEND_PORT}` },
+          },
+        ],
+      }),
 });
