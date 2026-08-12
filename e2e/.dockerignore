@@ -4,3 +4,4 @@ playwright-report
 playwright
 .gitignore
 Dockerfile
+.dockerignore

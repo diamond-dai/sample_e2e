@@ -1,6 +1,10 @@
 .venv
-__pycache__
+**/__pycache__
 *.db
 .pytest_cache
+.ruff_cache
 tests
+.python-version
 .gitignore
+Dockerfile
+.dockerignore
