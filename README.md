@@ -34,6 +34,14 @@ compose.yaml  db(Postgres) + backend + frontend + e2e の4サービス。ポー�
 E2E実行時は環境変数 `FRONTEND_PORT` / `BACKEND_PORT` で変更可能。
 Docker Compose 実行時はホストへのポート公開が一切ないため、衝突の心配がない。
 
+## 前提ツール
+
+| ツール | 用途 | 確認コマンド |
+|---|---|---|
+| uv | backend の依存管理・実行 | `uv --version` |
+| Node.js 20+ / pnpm | frontend と e2e | `node -v` / `pnpm -v` |
+| Docker + Compose | 隔離E2E(こちらだけなら uv/pnpm 不要) | `docker compose version` |
+
 ## セットアップ(ローカル実行する場合)
 
 ```bash
@@ -43,29 +51,53 @@ cd backend && uv sync
 # frontend
 cd frontend && pnpm install
 
-# e2e
+# e2e(Playwright本体 + Chromiumブラウザ)
 cd e2e && pnpm install && pnpm exec playwright install chromium
 ```
 
-## 実行
+## 実行方法
 
-### ローカル
+### 1. アプリを手で触ってみる
+
+ターミナルを2つ開いて:
 
 ```bash
-# 開発サーバー(手動で触る場合)
+# ターミナル1: バックエンド
 cd backend && uv run fastapi dev app/main.py --port 57069
-cd frontend && pnpm dev          # → http://localhost:55863
 
-# バックエンドの単体テスト
-cd backend && uv run pytest
-
-# E2E(サーバーは自動起動される。起動済みならそれを再利用)
-cd e2e && pnpm test
-cd e2e && pnpm test:ui           # UIモード
-cd e2e && pnpm report            # HTMLレポート
+# ターミナル2: フロントエンド
+cd frontend && pnpm dev
 ```
 
-### Docker Compose(完全隔離・冪等)
+- アプリ: http://localhost:55863 (ログインページに飛ぶ)
+- ログイン: `demo@example.com` / `password123`
+- API仕様書 (Swagger UI): http://127.0.0.1:57069/docs
+- DBは `backend/app.db` (SQLite) に自動作成される。消せばまっさらに戻る
+
+### 2. バックエンドの単体テスト
+
+```bash
+cd backend && uv run pytest        # 10件、約2秒
+cd backend && uv run pytest -v     # テスト名ごとに表示
+```
+
+テスト用DBは `backend/test.db` に分離されており、開発用の `app.db` には影響しない。
+
+### 3. E2Eテスト(ローカル)
+
+```bash
+cd e2e && pnpm test
+```
+
+サーバーは**自動で起動される**(起動済みならそれを再利用)。約20秒、ウォーム時は5秒程度。
+
+```bash
+cd e2e && pnpm test:ui             # UIモード。ステップごとのDOMスナップショットを確認できる。開発中はこれが便利
+cd e2e && pnpm test --headed       # ブラウザを表示しながら実行
+cd e2e && pnpm test login.spec.ts  # ファイル指定
+```
+
+### 4. E2Eテスト(Docker Compose、完全隔離・冪等)
 
 ```bash
 docker compose down                        # 前回のコンテナが残っていれば消す(DBを確実にまっさらに)
@@ -73,10 +105,31 @@ docker compose run --build --rm e2e        # ビルド → db/backend/frontend�
 docker compose down                        # 後片付け
 ```
 
-- 4サービスすべて内部ネットワークで通信し、**ホストへのポート公開はゼロ**
-- DBはvolumeを持たないため、`down` すればデータは消える(毎回まっさらな状態から)
-- 失敗時の成果物は `e2e/test-results/`、レポートは `e2e/playwright-report/` にマウントされる
+- 4サービスすべて内部ネットワークで通信し、**ホストへのポート公開はゼロ**(ローカルのポート使用状況と無関係に動く)
+- DBはPostgresで、volumeを持たないため `down` すればデータは消える(毎回まっさらな状態から)
+- 初回はイメージのダウンロードとビルドで数分かかる。2回目以降はキャッシュが効く
 - コンテナ間はhttpのため `COOKIE_SECURE=false` でSecure Cookieを無効化している(本番では外さないこと)
+
+### 5. テスト結果の確認
+
+```bash
+cd e2e && pnpm report              # HTMLレポートをブラウザで開く(compose実行の結果も同じ場所に出る)
+```
+
+- 失敗時はターミナルに期待値・実際の値・該当行が表示される
+- 失敗の詳細(ページ状態のスナップショット等)は `e2e/test-results/` に保存される
+- さらに深掘りするならトレース:
+
+```bash
+cd e2e && pnpm test --trace on
+cd e2e && pnpm exec playwright show-trace test-results/<失敗したテスト名>/trace.zip
+```
+
+### うまく動かないとき
+
+- **ポートが使用中**: `FRONTEND_PORT` / `BACKEND_PORT` 環境変数で変更できる(例: `BACKEND_PORT=57100 pnpm test`)。Docker Compose ならポートを一切使わないのでそもそも衝突しない
+- **`pn test` の序盤が無出力**: サーバー起動待ち。`[WebServer]` プレフィックスのログが流れていれば正常
+- **DBを初期化したい**: ローカルは `rm backend/app.db`、Docker は `docker compose down`
 
 ## E2Eテストの構成
 
